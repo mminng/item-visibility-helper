@@ -60,7 +60,6 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
                             loggerD("Current item visible percent >=50%, do nothing.")
                         }
                     } else {
-                        //没有需要激活的Item
                         if (oldPercent < 50) {
                             oldItem?.let { pauseItem(it, _activatePosition) }
                         } else {
