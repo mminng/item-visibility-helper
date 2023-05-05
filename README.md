@@ -1,6 +1,8 @@
 # ItemVisibilityHelper
 
-Item visibility helper for RecyclerView.[![](https://jitpack.io/v/mminng/item-visibility-helper.svg)](https://jitpack.io/#mminng/item-visibility-helper)
+Item visibility helper for RecyclerView.
+
+[![](https://jitpack.io/v/mminng/item-visibility-helper.svg)](https://jitpack.io/#mminng/item-visibility-helper)
 
 # Screenshot
 
