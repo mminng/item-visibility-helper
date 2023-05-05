@@ -5,7 +5,7 @@ import android.view.View
 /**
  * Created by zh on 2023/4/27.
  */
-interface OnItemStateChangeListener {
+internal interface OnItemStateChangeListener {
 
     /**
      * 激活Item，提供被激活的Item[view]和Item[position]。
