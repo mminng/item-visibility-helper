@@ -1,9 +1,15 @@
 # ItemVisibilityHelper
+
 Item visibility helper for RecyclerView.
+
 # Screenshot
+
 ![screenshot](https://github.com/mminng/item-visibility-helper/blob/master/screenshots/simple.gif)
+
 # Getting Started
+
 **Step 1.** Add it in your root build.gradle at the end of repositories:
+
 ```Groovy
 allprojects {
     repositories {
@@ -12,17 +18,45 @@ allprojects {
     }
 }
 ```
+
 **Step 2.** Add the dependency:
+
 ```Groovy
 dependencies {
     ...
     implementation 'com.github.mminng:item-visibility-helper:1.0.0'
 }
 ```
+
 # Simple
+
 ```Kotlin
+val helper: ItemVisibilityHelper = ItemVisibilityHelper()
+//Attach to RecyclerView.
+helper.attachToRecyclerView(recyclerView: RecyclerView, targetViewId: Int, autoActivate: Boolean) {
+    activateItem { view, position ->
+        //Item activated.
+    }
+    deactivateItem { view, position ->
+        //Item deactivated.
+    }
+    pauseItem { view, position ->
+        //Item paused.
+    }
+    resumeItem { view, position ->
+        //Item resumed.
+    }
+}
+//Activate most visible item.
+helper.activateItem()
+//Activate item by position.
+helper.activateItem(position: Int)
+//Deactivate item.
+helper.deactivateItem()
 ```
+
 # License
+
 ```markdown
 Copyright 2023 mminng
 

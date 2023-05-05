@@ -3,14 +3,12 @@ package com.simple.itemvisibility.horizontallist
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
 import android.view.Surface
 import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mminng.itemvisibility.ItemVisibilityHelper
 import com.simple.itemvisibility.R

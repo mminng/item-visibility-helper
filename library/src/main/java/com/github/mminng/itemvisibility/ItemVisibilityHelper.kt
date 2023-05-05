@@ -3,6 +3,7 @@ package com.github.mminng.itemvisibility
 import android.graphics.Rect
 import android.util.Pair
 import android.view.View
+import androidx.annotation.IdRes
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -111,7 +112,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
      */
     fun attachToRecyclerView(
         recyclerView: RecyclerView,
-        targetViewId: Int = View.NO_ID,
+        @IdRes targetViewId: Int = View.NO_ID,
         autoActivate: Boolean = true,
         listener: ItemStateChangeListener.() -> Unit
     ) {
