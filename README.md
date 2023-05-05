@@ -1,7 +1,7 @@
 # ItemVisibilityHelper
 Item visibility helper for RecyclerView.
 # Screenshot
-![screenshot](https://github.com/mminng/ItemVisibilityHelper/blob/master/screenshots/simple.gif)
+![screenshot](https://github.com/mminng/item-visibility-helper/blob/master/screenshots/simple.gif)
 # Getting Started
 **Step 1.** Add it in your root build.gradle at the end of repositories:
 ```Groovy
