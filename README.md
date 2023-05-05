@@ -1,7 +1,7 @@
 # ItemVisibilityHelper
 
 Item visibility helper for RecyclerView.  
-Help implement video playlist, like Facebook,TikTok etc.  
+Help implement video playlist, like Facebook, TikTok etc.  
 Or other features.
 
 [![](https://jitpack.io/v/mminng/item-visibility-helper.svg)](https://jitpack.io/#mminng/item-visibility-helper)
