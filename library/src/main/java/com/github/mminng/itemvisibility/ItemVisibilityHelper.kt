@@ -227,10 +227,8 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             }
         }
         if (max > 0) {
-            getItem(position)?.let {
-                loggerD("Find next: return position $position.")
-                return Pair.create(it, position)
-            }
+            loggerD("Find next: return position $position.")
+            return Pair.create(getItem(position), position)
         }
         loggerD("Find next: not find.")
         return Pair.create(null, RecyclerView.NO_POSITION)
@@ -261,10 +259,8 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             }
         }
         if (max > 0) {
-            getItem(position)?.let {
-                loggerD("Find last: return position $position.")
-                return Pair.create(it, position)
-            }
+            loggerD("Find last: return position $position.")
+            return Pair.create(getItem(position), position)
         }
         loggerD("Find last: not find.")
         return Pair.create(null, RecyclerView.NO_POSITION)
