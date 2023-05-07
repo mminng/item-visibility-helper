@@ -18,8 +18,8 @@ import com.github.mminng.itemvisibility.logger.loggerI
  * 2.滑动停止，如果激活中的Item可见范围大于50%则保持不变，否则关闭。
  *   同时激活显示范围中可见范围最大并且大于50%的Item，如果可见范围最大的依然是激活中的Item，
  *   那么可见范围大于50%则保持不变，否则不会关闭，会进入暂停状态，等可见范围不小于50%时恢复。
- *   另外，如果滑动停止后激活中的Item可见范围小于50%，但是显示范围中没有其他Item要激活，
- *   此时这个Item也会暂停状态，等可见范围不小于50%时恢复。
+ *   另外，如果激活中的Item可见范围小于50%，但是显示范围中没有其他Item需要激活，
+ *   此时这个Item也进入会暂停状态，等可见范围不小于50%时恢复。
  */
 class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _recyclerView: RecyclerView? = null
@@ -60,6 +60,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
                             loggerD("Current item visible percent >=50%, do nothing.")
                         }
                     } else {
+                        loggerD("No other item need to be activated.")
                         if (oldPercent < 50) {
                             oldItem?.let { pauseItem(it, _activatePosition) }
                         } else {
@@ -210,7 +211,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private fun findNextMostVisibleItem(firstPosition: Int, lastPosition: Int): Pair<View, Int> {
         loggerD("Find next: from $firstPosition to $lastPosition.")
         var max = 0
-        var position = firstPosition
+        var position = RecyclerView.NO_POSITION
         for (index in firstPosition..lastPosition) {
             val item: View? = getItem(index)
             if (item != null) {
@@ -227,11 +228,13 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             }
         }
         if (max > 0) {
-            loggerD("Find next: return position $position.")
-            return Pair.create(getItem(position), position)
+            getItem(position)?.let {
+                loggerD("Find next: return position $position.")
+                return Pair.create(it, position)
+            }
         }
         loggerD("Find next: not find.")
-        return Pair.create(null, RecyclerView.NO_POSITION)
+        return Pair.create(null, position)
     }
 
     /**
@@ -242,7 +245,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private fun findLastMostVisibleItem(lastPosition: Int, firstPosition: Int): Pair<View, Int> {
         loggerD("Find last: from $lastPosition to $firstPosition.")
         var max = 0
-        var position = lastPosition
+        var position = RecyclerView.NO_POSITION
         for (index in lastPosition downTo firstPosition) {
             val item: View? = getItem(index)
             if (item != null) {
@@ -259,11 +262,13 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             }
         }
         if (max > 0) {
-            loggerD("Find last: return position $position.")
-            return Pair.create(getItem(position), position)
+            getItem(position)?.let {
+                loggerD("Find last: return position $position.")
+                return Pair.create(it, position)
+            }
         }
         loggerD("Find last: not find.")
-        return Pair.create(null, RecyclerView.NO_POSITION)
+        return Pair.create(null, position)
     }
 
     /**
