@@ -25,7 +25,9 @@
         </activity>
         <activity android:name="com.simple.itemvisibility.horizontallist.HorizontalListActivity" />
         <activity android:name="com.simple.itemvisibility.verticallist.VerticalListActivity" />
-        <activity android:name="com.simple.itemvisibility.similartiktok.SimilarTikTokActivity" />
+        <activity android:name="com.simple.itemvisibility.pager.PagerListActivity" />
+        <activity android:name="com.simple.itemvisibility.gird.GridListActivity" />
+        <activity android:name="com.simple.itemvisibility.staggered.StaggeredListActivity" />
     </application>
 
 </manifest>

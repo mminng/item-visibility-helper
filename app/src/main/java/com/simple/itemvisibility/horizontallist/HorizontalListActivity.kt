@@ -47,13 +47,8 @@ class HorizontalListActivity : AppCompatActivity(), SurfaceTextureListener {
         )
         val adapter = HorizontalListAdapter(data)
         val helper = ItemVisibilityHelper()
-
-        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
-        }
-        player.setOnVideoSizeChangedListener { mediaPlayer, w, h ->
-            renderView?.setVideoSize(w, h)
         }
         binding.hListview.addItemDecoration(DividerItemDecoration(this, RecyclerView.HORIZONTAL))
         binding.hListview.adapter = adapter
@@ -64,7 +59,6 @@ class HorizontalListActivity : AppCompatActivity(), SurfaceTextureListener {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_h_renderer)
                 val cover: View = view.findViewById(R.id.item_h_cover)
-                renderView = renderer
                 cover.isVisible = false
                 player.isLooping = true
                 player.reset()

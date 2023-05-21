@@ -54,12 +54,8 @@ class VerticalListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlob
         binding.vListview.adapter = adapter
         binding.vListview.viewTreeObserver.addOnGlobalLayoutListener(this)
 
-        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
-        }
-        player.setOnVideoSizeChangedListener { mediaPlayer, w, h ->
-            renderView?.setVideoSize(w, h)
         }
         adapter.setOnItemClickListener { item, position ->
             helper.activateItem(position)
@@ -68,7 +64,6 @@ class VerticalListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlob
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_v_renderer)
                 val cover: View = view.findViewById(R.id.item_v_cover)
-                renderView = renderer
                 cover.isVisible = false
                 player.reset()
                 player.isLooping = true

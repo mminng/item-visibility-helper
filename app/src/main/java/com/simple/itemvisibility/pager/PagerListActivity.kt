@@ -1,4 +1,4 @@
-package com.simple.itemvisibility.similartiktok
+package com.simple.itemvisibility.pager
 
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
@@ -12,10 +12,10 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.github.mminng.itemvisibility.ItemVisibilityHelper
 import com.simple.itemvisibility.R
-import com.simple.itemvisibility.databinding.ActivitySimilarTiktokBinding
+import com.simple.itemvisibility.databinding.ActivityPagerListBinding
 import com.simple.itemvisibility.renderer.TextureRenderView
 
-class SimilarTikTokActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLayoutListener {
+class PagerListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLayoutListener {
 
     private val player = MediaPlayer()
     private val helper = ItemVisibilityHelper()
@@ -23,7 +23,7 @@ class SimilarTikTokActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivitySimilarTiktokBinding.inflate(layoutInflater)
+        val binding = ActivityPagerListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val data: List<String> = arrayListOf(
@@ -50,24 +50,19 @@ class SimilarTikTokActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
         )
         val adapter = SimilarToTikTokAdapter(data)
         val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(binding.tListview)
-        var renderView: TextureRenderView? = null
+        snapHelper.attachToRecyclerView(binding.pListview)
         player.setOnPreparedListener {
             player.start()
         }
-        player.setOnVideoSizeChangedListener { mediaPlayer, w, h ->
-            renderView?.setVideoSize(w, h)
-        }
-        binding.tListview.adapter = adapter
-        binding.tListview.viewTreeObserver.addOnGlobalLayoutListener(this)
+        binding.pListview.adapter = adapter
+        binding.pListview.viewTreeObserver.addOnGlobalLayoutListener(this)
         adapter.setOnItemClickListener { item, position ->
             helper.activateItem(position)
         }
-        helper.attachToRecyclerView(binding.tListview) {
+        helper.attachToRecyclerView(binding.pListview) {
             activateItem { view, position ->
-                val renderer: TextureRenderView = view.findViewById(R.id.item_t_renderer)
-                val cover: View = view.findViewById(R.id.item_t_cover)
-                renderView = renderer
+                val renderer: TextureRenderView = view.findViewById(R.id.item_p_renderer)
+                val cover: View = view.findViewById(R.id.item_p_cover)
                 cover.isVisible = false
                 player.isLooping = true
                 player.reset()
@@ -76,12 +71,12 @@ class SimilarTikTokActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
                     player.setSurface(Surface(renderer.surfaceTexture))
                     player.prepareAsync()
                 } else {
-                    renderer.surfaceTextureListener = this@SimilarTikTokActivity
+                    renderer.surfaceTextureListener = this@PagerListActivity
                 }
             }
             deactivateItem { view, position ->
-                val renderer: TextureRenderView = view.findViewById(R.id.item_t_renderer)
-                val cover: View = view.findViewById(R.id.item_t_cover)
+                val renderer: TextureRenderView = view.findViewById(R.id.item_p_renderer)
+                val cover: View = view.findViewById(R.id.item_p_cover)
                 renderer.surfaceTextureListener = null
                 cover.isVisible = true
                 player.stop()

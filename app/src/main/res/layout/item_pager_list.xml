@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <com.simple.itemvisibility.renderer.TextureRenderView
-        android:id="@+id/item_t_renderer"
+        android:id="@+id/item_p_renderer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
-        android:id="@+id/item_t_cover"
+        android:id="@+id/item_p_cover"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#C0C0C0"
@@ -26,7 +26,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/item_t_top_position"
+        android:id="@+id/item_p_top_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#80000000"
@@ -39,7 +39,7 @@
         tools:text="0" />
 
     <TextView
-        android:id="@+id/item_t_bottom_position"
+        android:id="@+id/item_p_bottom_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#80000000"

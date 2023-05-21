@@ -15,28 +15,28 @@ class TextureRenderView @JvmOverloads constructor(
 
     private var _videoWidth: Int = 0
     private var _videoHeight: Int = 0
+    private var _zoom: Boolean = false
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val size: Pair<Int, Int> = resize(
             _videoWidth.toFloat(),
             _videoHeight.toFloat(),
             measuredWidth.toFloat(),
             measuredHeight.toFloat()
         )
-        if (size.first == 0 || size.second == 0) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        } else {
-            super.onMeasure(
-                MeasureSpec.makeMeasureSpec(size.first, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(size.second, MeasureSpec.EXACTLY)
-            )
-        }
+        if (size.first == 0 || size.second == 0) return
+        super.onMeasure(
+            MeasureSpec.makeMeasureSpec(size.first, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(size.second, MeasureSpec.EXACTLY)
+        )
     }
 
-    fun setVideoSize(width: Int, height: Int) {
+    fun setVideoSize(width: Int, height: Int, zoom: Boolean) {
         if (_videoWidth != width || _videoHeight != height) {
             _videoWidth = width
             _videoHeight = height
+            _zoom = zoom
             requestLayout()
         }
     }
@@ -55,11 +55,18 @@ class TextureRenderView @JvmOverloads constructor(
         val videoAspectRatio: Float = videoWidth / videoHeight
         val difference: Float = videoAspectRatio / viewAspectRatio - 1
         if (abs(difference) <= 0.01F) return Pair.create(0, 0)
-
-        if (difference > 0) {
-            height = width / videoAspectRatio
+        if (_zoom) {
+            if (difference > 0) {
+                width = height * videoAspectRatio
+            } else {
+                height = width / videoAspectRatio
+            }
         } else {
-            width = height * videoAspectRatio
+            if (difference > 0) {
+                height = width / videoAspectRatio
+            } else {
+                width = height * videoAspectRatio
+            }
         }
         return Pair.create(width.toInt(), height.toInt())
     }

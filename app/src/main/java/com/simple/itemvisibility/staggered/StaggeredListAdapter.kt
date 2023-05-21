@@ -1,19 +1,19 @@
-package com.simple.itemvisibility.similartiktok
+package com.simple.itemvisibility.staggered
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.simple.itemvisibility.databinding.ItemSimilarTiktokBinding
+import com.simple.itemvisibility.databinding.ItemStaggeredListBinding
 
 /**
  * Created by zh on 2023/4/27.
  */
-class SimilarToTikTokAdapter constructor(private val data: List<String>) :
+class StaggeredListAdapter constructor(private val data: List<ListModel>) :
     RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding: ItemSimilarTiktokBinding =
-            ItemSimilarTiktokBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding: ItemStaggeredListBinding =
+            ItemStaggeredListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val holder = ViewHolder(binding)
         bindItemClick(holder)
         return holder
@@ -21,7 +21,7 @@ class SimilarToTikTokAdapter constructor(private val data: List<String>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.tag = data[position]
-        holder.bind(data[position], position)
+        holder.bind(data[position].height, position)
     }
 
     override fun getItemCount(): Int = data.size
@@ -44,11 +44,13 @@ class SimilarToTikTokAdapter constructor(private val data: List<String>) :
     }
 }
 
-class ViewHolder constructor(private val binding: ItemSimilarTiktokBinding) :
+class ViewHolder constructor(private val binding: ItemStaggeredListBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(url: String, position: Int) {
-        binding.itemTTopPosition.text = "$position"
-        binding.itemTBottomPosition.text = "$position"
+    fun bind(height: Int, position: Int) {
+        binding.itemSPosition.text = "$position"
+        val layoutParams: ViewGroup.LayoutParams = binding.itemSPosition.layoutParams
+        layoutParams.height = height
+        binding.itemSPosition.layoutParams = layoutParams
     }
 }

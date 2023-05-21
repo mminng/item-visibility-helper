@@ -4,8 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.simple.itemvisibility.databinding.ActivityMainBinding
+import com.simple.itemvisibility.gird.GridListActivity
 import com.simple.itemvisibility.horizontallist.HorizontalListActivity
-import com.simple.itemvisibility.similartiktok.SimilarTikTokActivity
+import com.simple.itemvisibility.pager.PagerListActivity
+import com.simple.itemvisibility.staggered.StaggeredListActivity
 import com.simple.itemvisibility.verticallist.VerticalListActivity
 
 class MainActivity : AppCompatActivity() {
@@ -21,8 +23,14 @@ class MainActivity : AppCompatActivity() {
         binding.horizontal.setOnClickListener {
             startActivity(Intent(this@MainActivity, HorizontalListActivity::class.java))
         }
-        binding.tikTok.setOnClickListener {
-            startActivity(Intent(this@MainActivity, SimilarTikTokActivity::class.java))
+        binding.grid.setOnClickListener {
+            startActivity(Intent(this@MainActivity, GridListActivity::class.java))
+        }
+        binding.staggered.setOnClickListener {
+            startActivity(Intent(this@MainActivity, StaggeredListActivity::class.java))
+        }
+        binding.pager.setOnClickListener {
+            startActivity(Intent(this@MainActivity, PagerListActivity::class.java))
         }
     }
 }

@@ -4,9 +4,10 @@ import android.graphics.Rect
 import android.util.Pair
 import android.view.View
 import androidx.annotation.IdRes
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.mminng.itemvisibility.listener.ItemStateChangeListener
 import com.github.mminng.itemvisibility.logger.loggerD
 import com.github.mminng.itemvisibility.logger.loggerI
@@ -23,7 +24,7 @@ import com.github.mminng.itemvisibility.logger.loggerI
  */
 class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _recyclerView: RecyclerView? = null
-    private var _layoutManager: LinearLayoutManager? = null
+    private var _layoutManager: LayoutManager? = null
     private var _orientation: Int = RecyclerView.VERTICAL
     private var _isReverseLayout: Boolean = false
     private var _targetViewId: Int = View.NO_ID
@@ -117,21 +118,35 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         listener: ItemStateChangeListener.() -> Unit
     ) {
         if (_recyclerView === recyclerView) return
-        if (recyclerView.layoutManager is GridLayoutManager ||
-            recyclerView.layoutManager !is LinearLayoutManager
-        ) throw RuntimeException("Only support RecyclerView with LinearLayoutManager.")
         removeListener()
         _recyclerView = recyclerView
-        _layoutManager = recyclerView.layoutManager as LinearLayoutManager
-        _orientation = _layoutManager?.orientation ?: RecyclerView.VERTICAL
-        _isReverseLayout = _layoutManager?.reverseLayout ?: false
+        when (recyclerView.layoutManager) {
+            is LinearLayoutManager -> {
+                _layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                _orientation = (_layoutManager as LinearLayoutManager).orientation
+                _isReverseLayout = (_layoutManager as LinearLayoutManager).reverseLayout
+            }
+
+            is StaggeredGridLayoutManager -> {
+                _layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+                _orientation = (_layoutManager as StaggeredGridLayoutManager).orientation
+                _isReverseLayout = (_layoutManager as StaggeredGridLayoutManager).reverseLayout
+            }
+
+            else -> {
+                throw RuntimeException(
+                    "Only support RecyclerView with LinearLayoutManager, " +
+                            "GridLayoutManager or StaggeredGridLayoutManager."
+                )
+            }
+        }
         _targetViewId = targetViewId
         _isAutoActivate = autoActivate
         setupListener(listener)
         loggerI(
             "ItemVisibilityHelper was attached to RecyclerView.\n" +
-                    "targetViewId=$targetViewId\n" +
-                    "autoActivate=$autoActivate"
+                    "Has targetViewId: ${targetViewId != View.NO_ID}.\n" +
+                    "AutoActivate: $autoActivate."
         )
     }
 
@@ -321,10 +336,21 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     }
 
     private fun findNewItem(): Pair<View, Int> {
-        val firstPosition: Int =
-            _layoutManager?.findFirstVisibleItemPosition() ?: RecyclerView.NO_POSITION
-        val lastPosition: Int =
-            _layoutManager?.findLastVisibleItemPosition() ?: RecyclerView.NO_POSITION
+        val firstPosition: Int
+        val lastPosition: Int
+        if (_layoutManager is StaggeredGridLayoutManager) {
+            firstPosition =
+                (_layoutManager as StaggeredGridLayoutManager).findFirstVisibleItemPositions(
+                    null
+                ).minOrNull() ?: RecyclerView.NO_POSITION
+            lastPosition =
+                (_layoutManager as StaggeredGridLayoutManager).findLastVisibleItemPositions(
+                    null
+                ).maxOrNull() ?: RecyclerView.NO_POSITION
+        } else {
+            firstPosition = (_layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            lastPosition = (_layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+        }
         return if (_isTopCloser)
             findNextMostVisibleItem(firstPosition, lastPosition) else
             findLastMostVisibleItem(lastPosition, firstPosition)
@@ -333,7 +359,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private fun getItem(position: Int): View? = _layoutManager?.findViewByPosition(position)
 
     private fun getItemVisiblePercent(item: View?): Int {
-        if (_targetViewId > View.NO_ID) {
+        if (_targetViewId != View.NO_ID) {
             return calculateVisiblePercent(item?.findViewById(_targetViewId), _orientation)
         }
         return calculateVisiblePercent(item, _orientation)
