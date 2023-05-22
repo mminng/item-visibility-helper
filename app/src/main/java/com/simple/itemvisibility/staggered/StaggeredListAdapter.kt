@@ -26,18 +26,18 @@ class StaggeredListAdapter constructor(private val data: List<ListModel>) :
 
     override fun getItemCount(): Int = data.size
 
-    fun setOnItemClickListener(listener: (item: String, position: Int) -> Unit) {
+    fun setOnItemClickListener(listener: (item: ListModel, position: Int) -> Unit) {
         _itemClick = listener
     }
 
-    private var _itemClick: ((item: String, position: Int) -> Unit)? = null
+    private var _itemClick: ((item: ListModel, position: Int) -> Unit)? = null
 
     private fun bindItemClick(holder: ViewHolder) {
         holder.itemView.setOnClickListener {
             _itemClick?.let {
                 val position = holder.adapterPosition
                 if (position == RecyclerView.NO_POSITION) return@setOnClickListener
-                val data: String = holder.itemView.tag as String
+                val data: ListModel = holder.itemView.tag as ListModel
                 it.invoke(data, position)
             }
         }

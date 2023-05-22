@@ -6,7 +6,6 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.mminng.itemvisibility.listener.ItemStateChangeListener
 import com.github.mminng.itemvisibility.logger.loggerD
@@ -17,14 +16,13 @@ import com.github.mminng.itemvisibility.logger.loggerI
  *
  * 1.滑动中，如果激活中的Item被移出显示范围，就关闭。
  * 2.滑动停止，如果激活中的Item可见范围大于50%则保持不变，否则关闭。
- *   同时激活显示范围中可见范围最大并且大于50%的Item，如果可见范围最大的依然是激活中的Item，
+ *   同时激活显示范围中可见范围最大并且不小于50%的Item，如果可见范围最大的依然是激活中的Item，
  *   那么可见范围大于50%则保持不变，否则不会关闭，会进入暂停状态，等可见范围不小于50%时恢复。
  *   另外，如果激活中的Item可见范围小于50%，但是显示范围中没有其他Item需要激活，
  *   此时这个Item也进入会暂停状态，等可见范围不小于50%时恢复。
  */
 class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _recyclerView: RecyclerView? = null
-    private var _layoutManager: LayoutManager? = null
     private var _orientation: Int = RecyclerView.VERTICAL
     private var _isReverseLayout: Boolean = false
     private var _targetViewId: Int = View.NO_ID
@@ -122,15 +120,13 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         _recyclerView = recyclerView
         when (recyclerView.layoutManager) {
             is LinearLayoutManager -> {
-                _layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                _orientation = (_layoutManager as LinearLayoutManager).orientation
-                _isReverseLayout = (_layoutManager as LinearLayoutManager).reverseLayout
+                _orientation = (recyclerView.layoutManager as LinearLayoutManager).orientation
+                _isReverseLayout = (recyclerView.layoutManager as LinearLayoutManager).reverseLayout
             }
 
             is StaggeredGridLayoutManager -> {
-                _layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
-                _orientation = (_layoutManager as StaggeredGridLayoutManager).orientation
-                _isReverseLayout = (_layoutManager as StaggeredGridLayoutManager).reverseLayout
+                _orientation = (recyclerView.layoutManager as StaggeredGridLayoutManager).orientation
+                _isReverseLayout = (recyclerView.layoutManager as StaggeredGridLayoutManager).reverseLayout
             }
 
             else -> {
@@ -248,7 +244,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
                 return Pair.create(it, position)
             }
         }
-        loggerD("Find next: not find.")
+        loggerD("Find next: not found.")
         return Pair.create(null, position)
     }
 
@@ -282,7 +278,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
                 return Pair.create(it, position)
             }
         }
-        loggerD("Find last: not find.")
+        loggerD("Find last: not found.")
         return Pair.create(null, position)
     }
 
@@ -336,27 +332,23 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     }
 
     private fun findNewItem(): Pair<View, Int> {
-        val firstPosition: Int
-        val lastPosition: Int
-        if (_layoutManager is StaggeredGridLayoutManager) {
+        val layoutManager = _recyclerView?.layoutManager
+        var firstPosition = RecyclerView.NO_POSITION
+        var lastPosition = RecyclerView.NO_POSITION
+        if (layoutManager is LinearLayoutManager) {
+            firstPosition = layoutManager.findFirstVisibleItemPosition()
+            lastPosition = layoutManager.findLastVisibleItemPosition()
+        } else if (layoutManager is StaggeredGridLayoutManager) {
             firstPosition =
-                (_layoutManager as StaggeredGridLayoutManager).findFirstVisibleItemPositions(
-                    null
-                ).minOrNull() ?: RecyclerView.NO_POSITION
+                layoutManager.findFirstVisibleItemPositions(null).minOrNull() ?: RecyclerView.NO_POSITION
             lastPosition =
-                (_layoutManager as StaggeredGridLayoutManager).findLastVisibleItemPositions(
-                    null
-                ).maxOrNull() ?: RecyclerView.NO_POSITION
-        } else {
-            firstPosition = (_layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            lastPosition = (_layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+                layoutManager.findLastVisibleItemPositions(null).maxOrNull() ?: RecyclerView.NO_POSITION
         }
-        return if (_isTopCloser)
-            findNextMostVisibleItem(firstPosition, lastPosition) else
+        return if (_isTopCloser) findNextMostVisibleItem(firstPosition, lastPosition) else
             findLastMostVisibleItem(lastPosition, firstPosition)
     }
 
-    private fun getItem(position: Int): View? = _layoutManager?.findViewByPosition(position)
+    private fun getItem(position: Int): View? = _recyclerView?.layoutManager?.findViewByPosition(position)
 
     private fun getItemVisiblePercent(item: View?): Int {
         if (_targetViewId != View.NO_ID) {
