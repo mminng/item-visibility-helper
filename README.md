@@ -30,7 +30,7 @@ dependencies {
 }
 ```
 
-# Simple
+# Usage
 
 ```Kotlin
 val helper: ItemVisibilityHelper = ItemVisibilityHelper()
