@@ -224,25 +224,21 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         var max = 0
         var position = RecyclerView.NO_POSITION
         for (index in firstPosition..lastPosition) {
-            val item: View? = getItem(index)
-            if (item != null) {
-                val percent: Int = getItemVisiblePercent(item)
-                if (percent == 100) {
-                    loggerD("Find next: position=$index max=100 return.")
-                    return Pair.create(item, index)
-                }
-                if (max < percent) {
-                    max = percent
-                    position = index
-                }
-                loggerD("Find next: position=$index max=$percent.")
+            val item = getItem(index)
+            val percent = getItemVisiblePercent(item)
+            if (percent == 100) {
+                loggerD("Find next: position=$index max=100 return.")
+                return Pair.create(item, index)
             }
+            if (max < percent) {
+                max = percent
+                position = index
+            }
+            loggerD("Find next: position=$index max=$percent.")
         }
         if (max > 0) {
-            getItem(position)?.let {
-                loggerD("Find next: return position $position.")
-                return Pair.create(it, position)
-            }
+            loggerD("Find next: return position $position.")
+            return Pair.create(getItem(position), position)
         }
         loggerD("Find next: not found.")
         return Pair.create(null, position)
@@ -258,25 +254,21 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         var max = 0
         var position = RecyclerView.NO_POSITION
         for (index in lastPosition downTo firstPosition) {
-            val item: View? = getItem(index)
-            if (item != null) {
-                val percent: Int = getItemVisiblePercent(item)
-                if (percent == 100) {
-                    loggerD("Find last: position=$index max=100 return.")
-                    return Pair.create(item, index)
-                }
-                if (max < percent) {
-                    max = percent
-                    position = index
-                }
-                loggerD("Find last: position=$index max=$percent.")
+            val item = getItem(index)
+            val percent = getItemVisiblePercent(item)
+            if (percent == 100) {
+                loggerD("Find last: position=$index max=100 return.")
+                return Pair.create(item, index)
             }
+            if (max < percent) {
+                max = percent
+                position = index
+            }
+            loggerD("Find last: position=$index max=$percent.")
         }
         if (max > 0) {
-            getItem(position)?.let {
-                loggerD("Find last: return position $position.")
-                return Pair.create(it, position)
-            }
+            loggerD("Find last: return position $position.")
+            return Pair.create(getItem(position), position)
         }
         loggerD("Find last: not found.")
         return Pair.create(null, position)
