@@ -36,7 +36,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         var scrolled = false
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (newState == RecyclerView.SCROLL_STATE_IDLE && scrolled) {
+            if (recyclerView.isShown && newState == RecyclerView.SCROLL_STATE_IDLE && scrolled) {
                 scrolled = false
                 val newItem: Pair<View, Int> = findNewItem()
                 if (newItem.first == null) return
