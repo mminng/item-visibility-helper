@@ -26,7 +26,7 @@ allprojects {
 ```Groovy
 dependencies {
     ...
-    implementation 'com.github.mminng:item-visibility-helper:1.0.1'
+    implementation 'com.github.mminng:item-visibility-helper:1.0.2'
 }
 ```
 
