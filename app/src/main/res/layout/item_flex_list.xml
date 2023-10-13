@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="20dp"
+    android:layout_marginBottom="20dp"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/item_f_player_view"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="0dp">
+
+        <com.simple.itemvisibility.renderer.TextureRenderView
+            android:id="@+id/item_f_renderer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <View
+            android:id="@+id/item_f_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#C0C0C0" />
+
+        <TextView
+            android:id="@+id/item_f_top_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#80000000"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:textColor="#F40002"
+            android:textSize="14sp"
+            tools:text="0" />
+
+        <TextView
+            android:id="@+id/item_f_bottom_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:background="#80000000"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:textColor="#F40002"
+            android:textSize="14sp"
+            tools:text="0" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/item_f_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="TextTextText" />
+</LinearLayout>

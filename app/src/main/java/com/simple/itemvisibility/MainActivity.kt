@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.simple.itemvisibility.databinding.ActivityMainBinding
+import com.simple.itemvisibility.flex.FlexListActivity
 import com.simple.itemvisibility.gird.GridListActivity
 import com.simple.itemvisibility.horizontallist.HorizontalListActivity
 import com.simple.itemvisibility.pager.PagerListActivity
@@ -31,6 +32,9 @@ class MainActivity : AppCompatActivity() {
         }
         binding.pager.setOnClickListener {
             startActivity(Intent(this@MainActivity, PagerListActivity::class.java))
+        }
+        binding.flex.setOnClickListener {
+            startActivity(Intent(this@MainActivity, FlexListActivity::class.java))
         }
     }
 }

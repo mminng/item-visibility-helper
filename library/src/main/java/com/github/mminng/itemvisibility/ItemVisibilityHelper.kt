@@ -19,7 +19,7 @@ import com.github.mminng.itemvisibility.logger.loggerI
  *   同时激活显示范围中可见范围最大并且不小于50%的Item，如果可见范围最大的依然是激活中的Item，
  *   那么可见范围大于50%则保持不变，否则不会关闭，会进入暂停状态，等可见范围不小于50%时恢复。
  *   另外，如果激活中的Item可见范围小于50%，但是显示范围中没有其他Item需要激活，
- *   此时这个Item也进入会暂停状态，等可见范围不小于50%时恢复。
+ *   此时这个Item也会进入暂停状态，等可见范围不小于50%时恢复。
  */
 class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _recyclerView: RecyclerView? = null
@@ -38,7 +38,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (recyclerView.isShown && newState == RecyclerView.SCROLL_STATE_IDLE && scrolled) {
                 scrolled = false
-                val newItem: Pair<View, Int> = findNewItem()
+                val newItem: Pair<View, Int> = findNewItem2()
                 if (newItem.first == null) return
                 //如果找到的Item是已激活的Item
                 if (isActivateItem(newItem.second)) {
@@ -75,15 +75,20 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
          * 因此在[onChildViewDetachedFromWindow]中会再次检查，如果有激活的立即关闭
          */
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (dx != 0 || dy != 0) scrolled = true
-            //有已激活的Item，检查其可见范围
-            if (hasActivateItem()) {
-                val item = getItem(_activatePosition)
-                if (item != null) {
-                    val percent = getItemVisiblePercent(item)
-                    loggerD("Current item visible percent is $percent%.")
-                    if (percent == 0) {
-                        deactivateItem(item, _activatePosition)
+            if (dx != 0 || dy != 0) {
+                scrolled = true
+                if (dy != 0) {
+                    _orientation = RecyclerView.VERTICAL
+                }
+                //有已激活的Item，检查其可见范围
+                if (hasActivateItem()) {
+                    val item = getItem(_activatePosition)
+                    if (item != null) {
+                        val percent = getItemVisiblePercent(item)
+                        loggerD("Current item visible percent is $percent%.")
+                        if (percent == 0) {
+                            deactivateItem(item, _activatePosition)
+                        }
                     }
                 }
             }
@@ -96,9 +101,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
 
     override fun onChildViewDetachedFromWindow(view: View) {
         if (hasActivateItem()) {
-            val detachedPosition: Int =
-                _recyclerView?.findContainingViewHolder(view)?.adapterPosition
-                    ?: RecyclerView.NO_POSITION
+            val detachedPosition = _recyclerView?.getChildAdapterPosition(view) ?: RecyclerView.NO_POSITION
             if (isActivateItem(detachedPosition)) {
                 deactivateItem(view, detachedPosition)
             }
@@ -118,24 +121,24 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         if (_recyclerView === recyclerView) return
         removeListener()
         _recyclerView = recyclerView
-        when (recyclerView.layoutManager) {
-            is LinearLayoutManager -> {
-                _orientation = (recyclerView.layoutManager as LinearLayoutManager).orientation
-                _isReverseLayout = (recyclerView.layoutManager as LinearLayoutManager).reverseLayout
-            }
-
-            is StaggeredGridLayoutManager -> {
-                _orientation = (recyclerView.layoutManager as StaggeredGridLayoutManager).orientation
-                _isReverseLayout = (recyclerView.layoutManager as StaggeredGridLayoutManager).reverseLayout
-            }
-
-            else -> {
-                throw RuntimeException(
-                    "Only support RecyclerView with LinearLayoutManager, " +
-                            "GridLayoutManager or StaggeredGridLayoutManager."
-                )
-            }
-        }
+//        when (recyclerView.layoutManager) {
+//            is LinearLayoutManager -> {
+//                _orientation = (recyclerView.layoutManager as LinearLayoutManager).orientation
+//                _isReverseLayout = (recyclerView.layoutManager as LinearLayoutManager).reverseLayout
+//            }
+//
+//            is StaggeredGridLayoutManager -> {
+//                _orientation = (recyclerView.layoutManager as StaggeredGridLayoutManager).orientation
+//                _isReverseLayout = (recyclerView.layoutManager as StaggeredGridLayoutManager).reverseLayout
+//            }
+//
+//            else -> {
+//                throw RuntimeException(
+//                    "Only support RecyclerView with LinearLayoutManager, " +
+//                            "GridLayoutManager or StaggeredGridLayoutManager."
+//                )
+//            }
+//        }
         _targetViewId = targetViewId
         _isAutoActivate = autoActivate
         setupListener(listener)
@@ -154,7 +157,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             loggerD("Current has an activated item.")
             return
         }
-        val newItem: Pair<View, Int> = findNewItem()
+        val newItem: Pair<View, Int> = findNewItem2()
         activateItem(newItem.first, newItem.second, _activatePosition)
     }
 
@@ -244,6 +247,8 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         return Pair.create(null, position)
     }
 
+    var _position: Int = 0;
+
     /**
      * 向上寻找可见范围最大的Item，从[lastPosition]到[firstPosition]。
      * 如果可见范围等于100则立即返回此Item。否则做比较，返回可见范围最大的Item及其Position。
@@ -254,6 +259,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         var max = 0
         var position = RecyclerView.NO_POSITION
         for (index in lastPosition downTo firstPosition) {
+            _position = index
             val item = getItem(index)
             val percent = getItemVisiblePercent(item)
             if (percent == 100) {
@@ -275,23 +281,23 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     }
 
     /**
-     * 依据[orientation]计算[view]可见百分比。
+     * 计算[view]可见百分比。
      */
-    private fun calculateVisiblePercent(view: View?, orientation: Int): Int {
+    private fun calculateVisiblePercent(view: View?): Int {
         if (view == null) return 0
         if (view.getLocalVisibleRect(outRect)) {
-            val viewHeight: Int = if (orientation == RecyclerView.HORIZONTAL)
+            val viewHeight: Int = if (_orientation == RecyclerView.HORIZONTAL)
                 view.width else view.height
-            val displayHeight: Int = if (orientation == RecyclerView.HORIZONTAL) {
+            val displayHeight: Int = if (_orientation == RecyclerView.HORIZONTAL) {
                 _recyclerView?.computeHorizontalScrollExtent() ?: 0
             } else {
                 _recyclerView?.computeVerticalScrollExtent() ?: 0
             }
             //outRect.top==outRect.left
-            val top: Int = if (orientation == RecyclerView.HORIZONTAL)
+            val top: Int = if (_orientation == RecyclerView.HORIZONTAL)
                 outRect.left else outRect.top
             //outRect.bottom==outRect.right
-            val bottom: Int = if (orientation == RecyclerView.HORIZONTAL)
+            val bottom: Int = if (_orientation == RecyclerView.HORIZONTAL)
                 outRect.right else outRect.bottom
             /*哪一边被遮挡的多则认为更靠近那一边。例如，顶部被遮挡的大于底部被遮挡的，则认为view的位置更靠近顶部。
               有可能顶部和底部被遮挡的一样则默认view更靠近顶部。
@@ -340,13 +346,26 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             findLastMostVisibleItem(lastPosition, firstPosition)
     }
 
+    private fun findNewItem2(): Pair<View, Int> {
+        _recyclerView?.let {
+            val firstPosition = it.getChildAdapterPosition(it.getChildAt(0))
+            val lastPosition = it.getChildAdapterPosition(it.getChildAt(it.childCount - 1))
+            return if (_isTopCloser) {
+                findNextMostVisibleItem(firstPosition, lastPosition)
+            } else {
+                findLastMostVisibleItem(lastPosition, firstPosition)
+            }
+        }
+        return Pair.create(null, RecyclerView.NO_POSITION)
+    }
+
     private fun getItem(position: Int): View? = _recyclerView?.layoutManager?.findViewByPosition(position)
 
     private fun getItemVisiblePercent(item: View?): Int {
         if (_targetViewId != View.NO_ID) {
-            return calculateVisiblePercent(item?.findViewById(_targetViewId), _orientation)
+            return calculateVisiblePercent(item?.findViewById(_targetViewId))
         }
-        return calculateVisiblePercent(item, _orientation)
+        return calculateVisiblePercent(item)
     }
 
     private fun hasActivateItem(): Boolean = _activatePosition != RecyclerView.NO_POSITION
