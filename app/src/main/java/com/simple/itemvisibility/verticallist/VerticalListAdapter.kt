@@ -21,7 +21,7 @@ class VerticalListAdapter constructor(private val data: List<String>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.tag = data[position]
-        holder.bind(data[position], position)
+        holder.bind(position)
     }
 
     override fun getItemCount(): Int = data.size
@@ -47,7 +47,7 @@ class VerticalListAdapter constructor(private val data: List<String>) :
 class ViewHolder constructor(private val binding: ItemVerticalListBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(url: String, position: Int) {
+    fun bind(position: Int) {
         binding.itemVTopPosition.text = "$position"
         binding.itemVBottomPosition.text = "$position"
     }

@@ -18,6 +18,7 @@ import com.simple.itemvisibility.renderer.TextureRenderView
 class HorizontalListActivity : AppCompatActivity(), SurfaceTextureListener {
 
     private val player = MediaPlayer()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityHorizontalListBinding.inflate(layoutInflater)
@@ -45,20 +46,26 @@ class HorizontalListActivity : AppCompatActivity(), SurfaceTextureListener {
             "https://vfx.mtime.cn/Video/2014/03/06/mp4/140306102651231568.mp4",
             "https://vfx.mtime.cn/Video/2023/01/11/mp4/230111074714264116.mp4",
         )
-        val adapter = HorizontalListAdapter(data)
         val helper = ItemVisibilityHelper()
+        val adapter = HorizontalListAdapter(data)
+        binding.hListview.addItemDecoration(DividerItemDecoration(this, RecyclerView.HORIZONTAL))
+        binding.hListview.adapter = adapter
+
+        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
         }
-        binding.hListview.addItemDecoration(DividerItemDecoration(this, RecyclerView.HORIZONTAL))
-        binding.hListview.adapter = adapter
-        adapter.setOnItemClickListener { item, position ->
+        player.setOnVideoSizeChangedListener { _, w, h ->
+            renderView?.setVideoSize(w, h, true)
+        }
+        adapter.setOnItemClickListener { _, position ->
             helper.activateItem(position)
         }
         helper.attachToRecyclerView(binding.hListview, autoActivate = false) {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_h_renderer)
                 val cover: View = view.findViewById(R.id.item_h_cover)
+                renderView = renderer
                 cover.isVisible = false
                 player.isLooping = true
                 player.reset()
@@ -70,17 +77,17 @@ class HorizontalListActivity : AppCompatActivity(), SurfaceTextureListener {
                     renderer.surfaceTextureListener = this@HorizontalListActivity
                 }
             }
-            deactivateItem { view, position ->
+            deactivateItem { view, _ ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_h_renderer)
                 val cover: View = view.findViewById(R.id.item_h_cover)
                 renderer.surfaceTextureListener = null
                 cover.isVisible = true
                 player.stop()
             }
-            pauseItem { view, position ->
+            pauseItem { _, _ ->
                 player.pause()
             }
-            resumeItem { view, position ->
+            resumeItem { _, _ ->
                 player.start()
             }
         }

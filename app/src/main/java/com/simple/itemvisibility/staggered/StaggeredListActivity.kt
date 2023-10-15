@@ -18,12 +18,12 @@ class StaggeredListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
 
     private val player = MediaPlayer()
     private val helper = ItemVisibilityHelper()
-    private var _init: Boolean = false
+    private lateinit var _binding: ActivityStaggeredListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityStaggeredListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        _binding = ActivityStaggeredListBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
 
         val data: List<ListModel> = arrayListOf(
             ListModel("https://vfx.mtime.cn/Video/2023/03/16/mp4/230316090518494157.mp4", 200),
@@ -47,20 +47,20 @@ class StaggeredListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
             ListModel("https://vfx.mtime.cn/Video/2014/03/06/mp4/140306102651231568.mp4", 200),
         )
         val adapter = StaggeredListAdapter(data)
-        binding.sListview.adapter = adapter
-        binding.sListview.viewTreeObserver.addOnGlobalLayoutListener(this)
+        _binding.sListview.adapter = adapter
+        _binding.sListview.viewTreeObserver.addOnGlobalLayoutListener(this)
 
         var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
         }
-        player.setOnVideoSizeChangedListener { mediaPlayer, w, h ->
+        player.setOnVideoSizeChangedListener { _, w, h ->
             renderView?.setVideoSize(w, h, true)
         }
-        adapter.setOnItemClickListener { item, position ->
+        adapter.setOnItemClickListener { _, position ->
             helper.activateItem(position)
         }
-        helper.attachToRecyclerView(binding.sListview, R.id.item_s_renderer) {
+        helper.attachToRecyclerView(_binding.sListview, R.id.item_s_player_view) {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_s_renderer)
                 val cover: View = view.findViewById(R.id.item_s_cover)
@@ -76,27 +76,19 @@ class StaggeredListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlo
                     renderer.surfaceTextureListener = this@StaggeredListActivity
                 }
             }
-            deactivateItem { view, position ->
+            deactivateItem { view, _ ->
                 val cover: View = view.findViewById(R.id.item_s_cover)
                 val renderer: TextureRenderView = view.findViewById(R.id.item_s_renderer)
                 cover.isVisible = true
                 renderer.surfaceTextureListener = null
                 player.stop()
             }
-            pauseItem { view, position ->
-                player.pause()
-            }
-            resumeItem { view, position ->
-                player.start()
-            }
         }
     }
 
     override fun onGlobalLayout() {
-        if (!_init) {
-            _init = true
-            helper.activateItem()
-        }
+        _binding.sListview.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        helper.activateItem()
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {

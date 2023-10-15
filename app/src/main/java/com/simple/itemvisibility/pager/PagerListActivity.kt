@@ -19,12 +19,12 @@ class PagerListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalL
 
     private val player = MediaPlayer()
     private val helper = ItemVisibilityHelper()
-    private var _init: Boolean = false
+    private lateinit var _binding: ActivityPagerListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityPagerListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        _binding = ActivityPagerListBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
 
         val data: List<String> = arrayListOf(
             "https://vfx.mtime.cn/Video/2023/03/16/mp4/230316090518494157.mp4",
@@ -48,21 +48,24 @@ class PagerListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalL
             "https://vfx.mtime.cn/Video/2014/03/06/mp4/140306102651231568.mp4",
             "https://vfx.mtime.cn/Video/2023/01/11/mp4/230111074714264116.mp4",
         )
-        val adapter = SimilarToTikTokAdapter(data)
+        val adapter = PagerListAdapter(data)
         val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(binding.pListview)
+        snapHelper.attachToRecyclerView(_binding.pListview)
+
+        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
         }
-        binding.pListview.adapter = adapter
-        binding.pListview.viewTreeObserver.addOnGlobalLayoutListener(this)
-        adapter.setOnItemClickListener { item, position ->
-            helper.activateItem(position)
+        player.setOnVideoSizeChangedListener { _, w, h ->
+            renderView?.setVideoSize(w, h, true)
         }
-        helper.attachToRecyclerView(binding.pListview) {
+        _binding.pListview.adapter = adapter
+        _binding.pListview.viewTreeObserver.addOnGlobalLayoutListener(this)
+        helper.attachToRecyclerView(_binding.pListview) {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_p_renderer)
                 val cover: View = view.findViewById(R.id.item_p_cover)
+                renderView = renderer
                 cover.isVisible = false
                 player.isLooping = true
                 player.reset()
@@ -74,7 +77,7 @@ class PagerListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalL
                     renderer.surfaceTextureListener = this@PagerListActivity
                 }
             }
-            deactivateItem { view, position ->
+            deactivateItem { view, _ ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_p_renderer)
                 val cover: View = view.findViewById(R.id.item_p_cover)
                 renderer.surfaceTextureListener = null
@@ -85,10 +88,8 @@ class PagerListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalL
     }
 
     override fun onGlobalLayout() {
-        if (!_init) {
-            _init = true
-            helper.activateItem(0)
-        }
+        _binding.pListview.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        helper.activateItem()
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {

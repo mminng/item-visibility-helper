@@ -20,12 +20,12 @@ class GridListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLa
 
     private val player = MediaPlayer()
     private val helper = ItemVisibilityHelper()
-    private var _init: Boolean = false
+    private lateinit var _binding: ActivityGridListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityGridListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        _binding = ActivityGridListBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
 
         val data: List<ListModel> = arrayListOf(
             ListModel("", false),
@@ -60,10 +60,10 @@ class GridListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLa
             ListModel("", false),
         )
         val adapter = GridListAdapter(data)
-        binding.gListview.viewTreeObserver.addOnGlobalLayoutListener(this)
-        binding.gListview.adapter = adapter
+        _binding.gListview.viewTreeObserver.addOnGlobalLayoutListener(this)
+        _binding.gListview.adapter = adapter
         val layoutManager = GridLayoutManager(this, 2)
-        binding.gListview.layoutManager = layoutManager
+        _binding.gListview.layoutManager = layoutManager
         layoutManager.spanSizeLookup = object : SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 if (data[position].isVideoType) {
@@ -72,16 +72,21 @@ class GridListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLa
                 return 1
             }
         }
+        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
         }
-        adapter.setOnItemClickListener { item, position ->
+        player.setOnVideoSizeChangedListener { _, w, h ->
+            renderView?.setVideoSize(w, h, true)
+        }
+        adapter.setOnItemClickListener { _, position ->
             helper.activateItem(position)
         }
-        helper.attachToRecyclerView(binding.gListview, R.id.item_g_renderer) {
+        helper.attachToRecyclerView(_binding.gListview, R.id.item_g_player_view) {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_g_renderer)
                 val cover: View = view.findViewById(R.id.item_g_cover)
+                renderView = renderer
                 cover.isVisible = false
                 player.reset()
                 player.isLooping = true
@@ -93,27 +98,19 @@ class GridListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLa
                     renderer.surfaceTextureListener = this@GridListActivity
                 }
             }
-            deactivateItem { view, position ->
+            deactivateItem { view, _ ->
                 val cover: View = view.findViewById(R.id.item_g_cover)
                 val renderer: TextureRenderView = view.findViewById(R.id.item_g_renderer)
                 cover.isVisible = true
                 renderer.surfaceTextureListener = null
                 player.stop()
             }
-            pauseItem { view, position ->
-                player.pause()
-            }
-            resumeItem { view, position ->
-                player.start()
-            }
         }
     }
 
     override fun onGlobalLayout() {
-        if (!_init) {
-            _init = true
-            helper.activateItem()
-        }
+        _binding.gListview.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        helper.activateItem()
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {

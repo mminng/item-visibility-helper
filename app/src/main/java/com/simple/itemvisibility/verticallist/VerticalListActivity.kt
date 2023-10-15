@@ -20,12 +20,12 @@ class VerticalListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlob
 
     private val player = MediaPlayer()
     private val helper = ItemVisibilityHelper()
-    private var _init: Boolean = false
+    private lateinit var _binding: ActivityVerticalListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityVerticalListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        _binding = ActivityVerticalListBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
 
         val data: List<String> = arrayListOf(
             "https://vfx.mtime.cn/Video/2023/03/16/mp4/230316090518494157.mp4",
@@ -50,20 +50,25 @@ class VerticalListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlob
             "https://vfx.mtime.cn/Video/2023/01/11/mp4/230111074714264116.mp4",
         )
         val adapter = VerticalListAdapter(data)
-        binding.vListview.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
-        binding.vListview.adapter = adapter
-        binding.vListview.viewTreeObserver.addOnGlobalLayoutListener(this)
+        _binding.vListview.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+        _binding.vListview.adapter = adapter
+        _binding.vListview.viewTreeObserver.addOnGlobalLayoutListener(this)
 
+        var renderView: TextureRenderView? = null
         player.setOnPreparedListener {
             player.start()
         }
-        adapter.setOnItemClickListener { item, position ->
+        player.setOnVideoSizeChangedListener { _, w, h ->
+            renderView?.setVideoSize(w, h, true)
+        }
+        adapter.setOnItemClickListener { _, position ->
             helper.activateItem(position)
         }
-        helper.attachToRecyclerView(binding.vListview, R.id.item_v_renderer) {
+        helper.attachToRecyclerView(_binding.vListview, R.id.item_v_player_view) {
             activateItem { view, position ->
                 val renderer: TextureRenderView = view.findViewById(R.id.item_v_renderer)
                 val cover: View = view.findViewById(R.id.item_v_cover)
+                renderView = renderer
                 cover.isVisible = false
                 player.reset()
                 player.isLooping = true
@@ -75,27 +80,19 @@ class VerticalListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlob
                     renderer.surfaceTextureListener = this@VerticalListActivity
                 }
             }
-            deactivateItem { view, position ->
+            deactivateItem { view, _ ->
                 val cover: View = view.findViewById(R.id.item_v_cover)
                 val renderer: TextureRenderView = view.findViewById(R.id.item_v_renderer)
                 cover.isVisible = true
                 renderer.surfaceTextureListener = null
                 player.stop()
             }
-            pauseItem { view, position ->
-                player.pause()
-            }
-            resumeItem { view, position ->
-                player.start()
-            }
         }
     }
 
     override fun onGlobalLayout() {
-        if (!_init) {
-            _init = true
-            helper.activateItem()
-        }
+        _binding.vListview.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        helper.activateItem()
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {

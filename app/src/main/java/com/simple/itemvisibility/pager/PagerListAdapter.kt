@@ -8,7 +8,7 @@ import com.simple.itemvisibility.databinding.ItemPagerListBinding
 /**
  * Created by zh on 2023/4/27.
  */
-class SimilarToTikTokAdapter constructor(private val data: List<String>) :
+class PagerListAdapter constructor(private val data: List<String>) :
     RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
