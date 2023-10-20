@@ -23,21 +23,21 @@ import com.github.mminng.itemvisibility.logger.loggerI
  */
 class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _recyclerView: RecyclerView? = null
+    private var _targetViewId: Int = View.NO_ID
     private var _orientation: Int = RecyclerView.VERTICAL
     private var _isReverseLayout: Boolean = false
-    private var _targetViewId: Int = View.NO_ID
-    private var _activatePosition: Int = RecyclerView.NO_POSITION
     private var _isTopCloser: Boolean = true
     private var _isPauseState: Boolean = false
     private var _isAutoActivate: Boolean = true
+    private var _activatePosition: Int = RecyclerView.NO_POSITION
     private val outRect: Rect = Rect()
     private var _itemStateChangeListener: ItemStateChangeListener? = null
     private val scrollListener = object : RecyclerView.OnScrollListener() {
-        var scrolled = false
+        var isScrolled = false
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (recyclerView.isShown && newState == RecyclerView.SCROLL_STATE_IDLE && scrolled) {
-                scrolled = false
+            if (isScrolled && recyclerView.isShown && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                isScrolled = false
                 val newItem: Pair<View, Int> = findNewItem()
                 if (newItem.first == null) return
                 //如果找到的Item是已激活的Item
@@ -56,7 +56,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
                         if (oldPercent < 50) {
                             activateItem(newItem.first, newItem.second, _activatePosition)
                         } else {
-                            loggerD("Current item visible percent >=50%, do nothing.")
+                            loggerD("Current activated item visible percent >=50%, do nothing.")
                         }
                     } else {
                         loggerD("No other item need to be activated.")
@@ -76,13 +76,13 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
          */
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             if (dx != 0 || dy != 0) {
-                scrolled = true
+                isScrolled = true
                 //有已激活的Item，检查其可见范围
                 if (hasActivateItem()) {
                     val item = getItem(_activatePosition)
                     if (item != null) {
                         val percent = getItemVisiblePercent(item)
-                        loggerD("Current item visible percent is $percent%.")
+                        loggerD("Current activated item visible percent is $percent%.")
                         if (percent == 0) {
                             deactivateItem(item, _activatePosition)
                         }
@@ -98,8 +98,7 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
 
     override fun onChildViewDetachedFromWindow(view: View) {
         if (hasActivateItem()) {
-            val detachedPosition =
-                _recyclerView?.getChildAdapterPosition(view) ?: RecyclerView.NO_POSITION
+            val detachedPosition = _recyclerView?.getChildAdapterPosition(view) ?: RecyclerView.NO_POSITION
             if (isActivateItem(detachedPosition)) {
                 deactivateItem(view, detachedPosition)
             }
@@ -128,10 +127,8 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
             }
 
             is StaggeredGridLayoutManager -> {
-                _orientation =
-                    (recyclerView.layoutManager as StaggeredGridLayoutManager).orientation
-                _isReverseLayout =
-                    (recyclerView.layoutManager as StaggeredGridLayoutManager).reverseLayout
+                _orientation = (recyclerView.layoutManager as StaggeredGridLayoutManager).orientation
+                _isReverseLayout = (recyclerView.layoutManager as StaggeredGridLayoutManager).reverseLayout
             }
 
             else -> {
@@ -145,7 +142,9 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
         loggerI(
             "ItemVisibilityHelper was attached to RecyclerView.\n" +
                     "Has targetViewId: ${targetViewId != View.NO_ID}.\n" +
-                    "AutoActivate: $autoActivate."
+                    "AutoActivate: $autoActivate.\n" +
+                    "Orientation: ${if (_orientation == RecyclerView.VERTICAL) "Vertical" else "Horizontal"}.\n" +
+                    "ReverseLayout: $_isReverseLayout."
         )
     }
 
