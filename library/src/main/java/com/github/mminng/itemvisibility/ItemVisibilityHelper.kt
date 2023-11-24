@@ -30,8 +30,8 @@ class ItemVisibilityHelper : RecyclerView.OnChildAttachStateChangeListener {
     private var _isPauseState: Boolean = false
     private var _isAutoActivate: Boolean = true
     private var _activatePosition: Int = RecyclerView.NO_POSITION
-    private val outRect: Rect = Rect()
     private var _itemStateChangeListener: ItemStateChangeListener? = null
+    private val outRect: Rect = Rect()
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         var isScrolled = false
 
