@@ -26,7 +26,7 @@ allprojects {
 ```Groovy
 dependencies {
     ...
-    implementation 'com.github.mminng:item-visibility-helper:1.0.2'
+    implementation 'com.github.mminng:item-visibility-helper:1.0.3'
 }
 ```
 
@@ -35,7 +35,11 @@ dependencies {
 ```Kotlin
 val helper: ItemVisibilityHelper = ItemVisibilityHelper()
 //Attach to RecyclerView.
-helper.attachToRecyclerView(recyclerView: RecyclerView, targetViewId: Int, autoActivate: Boolean) {
+helper.attachToRecyclerView(recyclerView: RecyclerView,
+                            targetViewId: Int = View.NO_ID,
+                            autoActivate: Boolean = true,
+                            orientation: Int = RecyclerView.VERTICAL,
+                            reverseLayout: Boolean = false){
     activateItem { view, position ->
         //Item activated.
     }
