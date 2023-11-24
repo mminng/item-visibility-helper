@@ -105,6 +105,12 @@ class GridListActivity : AppCompatActivity(), SurfaceTextureListener, OnGlobalLa
                 renderer.surfaceTextureListener = null
                 player.stop()
             }
+            pauseItem { _, _ ->
+                player.pause()
+            }
+            resumeItem { _, _ ->
+                player.start()
+            }
         }
     }
 
